@@ -314,8 +314,16 @@ def run_eval(input_path, output_path):
         elif data_item["type"] == "full-page OCR en":
             if not data_item["predict"]:
                 data_item["score"] == 0
+                data_item["bleu"] = 0
+                data_item["meteor"] = 0
+                data_item["f1"] = 0
+                data_item["edit_distance"] = 1  # max distance
             else:
                 ocr_metric = cal_per_metrics(data_item["predict"], data_item["answers"][0])
+                bleu = get_value_or_zero(ocr_metric["bleu"])
+                meteor = get_value_or_zero(ocr_metric["meteor"])
+                f1 = get_value_or_zero(ocr_metric["f_measure"])
+                edit_dist = get_value_or_zero(ocr_metric["edit_dist"])
                 data_item["score"] = (
                     get_value_or_zero(ocr_metric["bleu"]) + 
                     get_value_or_zero(ocr_metric["meteor"]) + 
@@ -376,7 +384,7 @@ def run_eval(input_path, output_path):
             print("\n" + task_name)
             print(f"Task {task_name}, total instructions: {total_len}, average score: {mean_score:.3f}")
 
-            if task_name == "fine-grained text recognition en":
+            if task_name == "fine-grained text recognition en" or task_name == "full-page OCR en":
                 print(f"  BLEU:   {bleu_total / total_len:.3f}")
                 print(f"  METEOR: {meteor_total / total_len:.3f}")
                 print(f"  F1:     {f1_total / total_len:.3f}")
