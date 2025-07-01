@@ -313,7 +313,7 @@ def run_eval(input_path, output_path):
 
         elif data_item["type"] == "full-page OCR en":
             if not data_item["predict"]:
-                data_item["score"] == 0
+                data_item["score"] = 0
                 data_item["bleu"] = 0
                 data_item["meteor"] = 0
                 data_item["f1"] = 0
@@ -324,12 +324,13 @@ def run_eval(input_path, output_path):
                 meteor = get_value_or_zero(ocr_metric["meteor"])
                 f1 = get_value_or_zero(ocr_metric["f_measure"])
                 edit_dist = get_value_or_zero(ocr_metric["edit_dist"])
-                data_item["score"] = (
-                    get_value_or_zero(ocr_metric["bleu"]) + 
-                    get_value_or_zero(ocr_metric["meteor"]) + 
-                    get_value_or_zero(ocr_metric["f_measure"]) + 
-                    (1 - get_value_or_zero(ocr_metric["edit_dist"]))
-                ) / 4
+
+                data_item["bleu"] = bleu
+                data_item["meteor"] = meteor
+                data_item["f1"] = f1
+                data_item["edit_distance"] = edit_dist
+                
+                data_item["score"] = (bleu + meteor + f1 + (1 - edit_dist)) / 4
 
         elif data_item["type"] == "full-page OCR cn":
             if not isinstance(data_item["predict"], str):
@@ -374,6 +375,12 @@ def run_eval(input_path, output_path):
                 total_len += 1
                 mean_score += item["score"]
                 if task_name == "fine-grained text recognition en":
+                    bleu_total += item.get("bleu", 0)
+                    meteor_total += item.get("meteor", 0)
+                    f1_total += item.get("f1", 0)
+                    edit_total += item.get("edit_distance", 1)
+
+                if task_name == "full-page OCR en":
                     bleu_total += item.get("bleu", 0)
                     meteor_total += item.get("meteor", 0)
                     f1_total += item.get("f1", 0)
